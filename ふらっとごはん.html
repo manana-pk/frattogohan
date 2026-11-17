@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ふらっとごはん</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+/* Layout: スライドと同じ「セージグリーン＋オレンジのピン」の世界観。デスクトップは左にデモ手順、右にスマホ画面。スマホでは画面いっぱいにアプリ。 */
+:root{
+  --bg:#f3f0e8; --surface:#fffdf8; --surface-2:#edf1e8; --surface-3:#e3eadf;
+  --ink:#2c322e; --ink-2:#646d66; --line:#dfe2d7;
+  --sage:#4f8160; --sage-deep:#3c6a4c; --on-sage:#ffffff; --sage-soft:#dbe7da;
+  --pin:#e0623a; --pin-off:#a7aea8; --pin-soft:#fbe3d8;
+  --ng:#c4432b; --ng-soft:#f8dfd8; --cc:#a8700f; --cc-soft:#f6ead0; --ok:#3f7a52; --ok-soft:#dcebdc;
+  --map-land:#eef0e5; --map-block:#e2e7d8; --map-road:#ffffff; --map-casing:#d8dccd; --map-major:#fbf4e2; --map-park:#cfe1c4; --map-water:#cfe2ea; --map-campus:#d6e4d6; --map-label:#7a8379;
+  --loc:#2f7fd0; --qr-bg:#ffffff; --qr-fg:#1f2621;
+  --shadow:0 10px 30px rgba(52,64,54,.14);
+  --f-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;
+  --f-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141815; --surface:#1d221e; --surface-2:#252c27; --surface-3:#2d3530;
+  --ink:#e7ebe5; --ink-2:#a2aba3; --line:#343c36;
+  --sage:#86b896; --sage-deep:#a7d2b4; --on-sage:#11261a; --sage-soft:#2a3d30;
+  --pin:#f07c55; --pin-off:#6b746d; --pin-soft:#4a2c22;
+  --ng:#f08b74; --ng-soft:#4a2620; --cc:#e5b25a; --cc-soft:#433416; --ok:#8fcb9f; --ok-soft:#24392a;
+  --map-land:#1c211d; --map-block:#252c27; --map-road:#323a34; --map-casing:#2a312c; --map-major:#3c4038; --map-park:#24372a; --map-water:#1f3139; --map-campus:#2a3b2f; --map-label:#8d978e;
+  --loc:#6aaef0; --qr-bg:#ffffff; --qr-fg:#1f2621;
+  --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#141815; --surface:#1d221e; --surface-2:#252c27; --surface-3:#2d3530;
+  --ink:#e7ebe5; --ink-2:#a2aba3; --line:#343c36;
+  --sage:#86b896; --sage-deep:#a7d2b4; --on-sage:#11261a; --sage-soft:#2a3d30;
+  --pin:#f07c55; --pin-off:#6b746d; --pin-soft:#4a2c22;
+  --ng:#f08b74; --ng-soft:#4a2620; --cc:#e5b25a; --cc-soft:#433416; --ok:#8fcb9f; --ok-soft:#24392a;
+  --map-land:#1c211d; --map-block:#252c27; --map-road:#323a34; --map-casing:#2a312c; --map-major:#3c4038; --map-park:#24372a; --map-water:#1f3139; --map-campus:#2a3b2f; --map-label:#8d978e;
+  --loc:#6aaef0; --qr-bg:#ffffff; --qr-fg:#1f2621;
+  --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.6;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--pin);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.3}
+
+/* ---------- stage ---------- */
+.stage{height:100%;display:flex;justify-content:center;align-items:stretch}
+.guide{display:none}
+.app{position:relative;width:100%;height:100%;display:flex;flex-direction:column;background:var(--surface);overflow:hidden}
+@media (min-width:900px){
+  body{overflow:auto}
+  .stage{gap:40px;align-items:center;padding-block:24px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));min-height:100%;height:auto}
+  .guide{display:flex}
+  .app{width:400px;height:min(820px,calc(100vh - 48px));min-height:620px;border-radius:36px;border:10px solid var(--ink);box-shadow:var(--shadow);flex:none}
+  .guide-btn{display:none!important}
+}
+
+/* guide panel */
+.guide{flex-direction:column;gap:18px;width:360px;max-width:100%}
+.guide .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--sage);font-weight:700}
+.guide h1{font-size:40px;font-weight:900;letter-spacing:.02em}
+.guide .sub{font-family:var(--f-display);font-weight:700;color:var(--ink-2);margin-top:4px}
+.guide .note{font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.flow h3{font-size:14px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.flow h3 span{background:var(--sage);color:var(--on-sage);border-radius:99px;padding:1px 12px;font-size:12px}
+.flow ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.flow button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 10px;transition:border-color .15s,transform .15s}
+.flow button:hover{border-color:var(--sage);transform:translateX(2px)}
+.flow .num{flex:none;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pin);display:grid;place-items:center}
+.flow .num b{transform:rotate(45deg);color:#fff;font-size:11px}
+.flow .t{font-weight:700;font-size:13px}
+.flow .d{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.guide .guide-close{display:none}
+.guide.open{display:flex;position:absolute;inset:0;z-index:60;background:var(--surface);overflow:auto;width:auto;padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.guide.open .guide-close{display:grid;align-self:flex-end}
+
+/* ---------- app chrome ---------- */
+.top{flex:none;display:flex;align-items:center;gap:8px;padding:12px 14px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.brand{display:flex;align-items:center;gap:6px;font-family:var(--f-display);font-weight:900;font-size:18px;white-space:nowrap}
+.brand svg{width:20px;height:20px;color:var(--pin)}
+.seg{margin-left:auto;display:flex;background:var(--surface-2);border-radius:99px;padding:3px}
+.seg button{border:0;background:none;border-radius:99px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--sage);color:var(--on-sage)}
+.icon-btn{border:0;background:var(--surface-2);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:none}
+.icon-btn svg{width:18px;height:18px}
+.main{flex:1;min-height:0;overflow:auto;position:relative}
+.main.is-map{display:flex;flex-direction:column;overflow:hidden}
+.tabbar{flex:none;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-top:1px solid var(--line);background:var(--surface);padding-bottom:4px}
+.tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0 3px;font-size:10.5px;color:var(--ink-2);font-weight:500}
+.tabbar svg{width:22px;height:22px}
+.tabbar button[aria-current="true"]{color:var(--sage);font-weight:700}
+.pad{padding:16px}
+.section-title{font-family:var(--f-display);font-size:17px;font-weight:700;margin:0 0 10px}
+.muted{color:var(--ink-2)}
+.small{font-size:12px}
+
+/* chips & pills */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;padding:1px 9px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);border:1px solid transparent;white-space:nowrap}
+.chip.hit{background:var(--ng-soft);color:var(--ng);border-color:var(--ng);font-weight:700}
+.chip.cchit{background:var(--cc-soft);color:var(--cc);border-color:var(--cc);font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.pill svg{width:13px;height:13px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.ng{background:var(--ng-soft);color:var(--ng)}
+.pill.cc{background:var(--cc-soft);color:var(--cc)}
+.pill.old{background:var(--cc-soft);color:var(--cc)}
+.pill.fresh{background:var(--surface-2);color:var(--ink-2);font-weight:500}
+
+.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:var(--sage);color:var(--on-sage);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn svg{width:17px;height:17px}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.line{background:none;border:1.5px solid var(--line);color:var(--ink)}
+.btn.danger{background:var(--ng-soft);color:var(--ng)}
+.btn.block{width:100%}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:10px}
+
+/* ---------- map ---------- */
+.filterbar{flex:none;padding:10px 12px 8px;display:grid;gap:8px;background:var(--surface)}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:12px;padding:0 12px}
+.search svg{width:16px;height:16px;color:var(--ink-2);flex:none}
+.search input{border:0;background:none;outline:none;padding:9px 0;width:100%;min-width:0}
+.avoid{display:flex;align-items:center;gap:6px;font-size:12px;min-width:0}
+.avoid .lbl{color:var(--ink-2);white-space:nowrap}
+.avoid .chips{flex-wrap:nowrap;overflow:auto;min-width:0}
+.avoid .edit{margin-left:auto;border:0;background:none;color:var(--sage);font-weight:700;font-size:12px;white-space:nowrap;padding:0}
+.mapwrap{position:relative;flex:1 1 56%;min-height:220px;background:var(--map-land);overflow:hidden}
+.mapwrap svg.map{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mapwrap svg.map:active{cursor:grabbing}
+.m-land{fill:var(--map-land)} .m-block{fill:var(--map-block)} .m-park{fill:var(--map-park)} .m-water{fill:var(--map-water)} .m-campus{fill:var(--map-campus);stroke:var(--sage);stroke-width:2;stroke-dasharray:6 4}
+.m-road{stroke:var(--map-road);fill:none;stroke-linecap:round} .m-casing{stroke:var(--map-casing);fill:none;stroke-linecap:round} .m-major{stroke:var(--map-major);fill:none;stroke-linecap:round}
+.m-label{fill:var(--map-label);font-size:15px;font-weight:700;font-family:var(--f-display);letter-spacing:.15em}
+.m-label.sm{font-size:12px;letter-spacing:.05em}
+.m-sta{fill:var(--surface);stroke:var(--sage);stroke-width:3}
+.m-sta-t{fill:var(--sage);font-size:11px;font-weight:900;text-anchor:middle;dominant-baseline:central;font-family:var(--f-body)}
+.pin path{fill:var(--pin);stroke:var(--surface);stroke-width:2}
+.pin.off path{fill:var(--pin-off)}
+.pin .hole{fill:var(--surface)}
+.pin .badge{fill:var(--surface);stroke:var(--pin);stroke-width:2}
+.pin.off .badge{stroke:var(--pin-off)}
+.pin .bt{font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;fill:var(--ink);font-family:var(--f-body)}
+.pin{cursor:pointer}
+.pin.sel path{fill:var(--sage-deep)}
+.pin.sel .badge{stroke:var(--sage-deep)}
+.loc-ring{fill:var(--loc);opacity:.18}
+.loc-dot{fill:var(--loc);stroke:var(--surface);stroke-width:3}
+@media (prefers-reduced-motion:no-preference){.loc-ring{animation:ping 2s ease-out infinite;transform-box:fill-box;transform-origin:center}}
+@keyframes ping{0%{transform:scale(.5);opacity:.35}100%{transform:scale(1.4);opacity:0}}
+.mapctl{position:absolute;top:10px;right:10px;display:grid;gap:6px}
+.mapctl button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.mapctl svg{width:18px;height:18px}
+.maptag{position:absolute;left:8px;top:10px;font-size:10.5px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);padding:2px 8px;border-radius:99px;max-width:calc(100% - 70px)}
+.mapcard{position:absolute;left:10px;right:10px;bottom:10px;background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:10px 12px;display:flex;gap:10px;align-items:center;border:1px solid var(--line)}
+.mapcard .info{min-width:0;flex:1}
+.mapcard .nm{font-weight:700;font-family:var(--f-display);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.listwrap{flex:1 1 44%;min-height:0;overflow:auto;border-top:1px solid var(--line);background:var(--surface)}
+.listhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px 4px;position:sticky;top:0;background:var(--surface);z-index:1}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:0;background:none;color:var(--ink-2);padding:0}
+.toggle .sw{width:30px;height:18px;border-radius:99px;background:var(--line);position:relative;transition:background .15s;flex:none}
+.toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:left .15s}
+.toggle[aria-pressed="true"] .sw{background:var(--sage)}
+.toggle[aria-pressed="true"] .sw::after{left:14px}
+.shoplist{list-style:none;margin:0;padding:4px 10px 14px;display:grid;gap:6px}
+.shoprow{width:100%;text-align:left;display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px}
+.shoprow:hover{border-color:var(--sage)}
+.shoprow .ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-family:var(--f-display);font-weight:900;color:var(--sage)}
+.shoprow .info{flex:1;min-width:0}
+.shoprow .nm{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shoprow .meta{display:block;font-size:11.5px;color:var(--ink-2)}
+.okcount{flex:none;text-align:center;line-height:1.1}
+.okcount b{display:block;font-size:18px;font-family:var(--f-display);color:var(--ok)}
+.okcount.zero b{color:var(--pin-off)}
+.okcount span{font-size:10px;color:var(--ink-2)}
+
+/* ---------- detail ---------- */
+.dhead{padding:12px 16px 14px;background:var(--surface-2);display:grid;gap:8px}
+.back{border:0;background:none;display:inline-flex;align-items:center;gap:4px;color:var(--ink-2);font-size:12.5px;padding:0;justify-self:start}
+.back svg{width:16px;height:16px}
+.dhead h2{font-size:22px;font-weight:900}
+.dmeta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink-2)}
+.dactions{display:flex;gap:8px}
+.dactions .btn{flex:1}
+.dhead .btn.ghost{background:var(--surface)}
+.btn.faved{background:var(--pin-soft);color:var(--pin)}
+.qrbanner{display:flex;gap:8px;align-items:center;background:var(--sage);color:var(--on-sage);padding:8px 16px;font-size:12.5px;font-weight:700}
+.qrbanner svg{width:18px;height:18px;flex:none}
+.disclaimer{display:flex;gap:8px;font-size:11.5px;color:var(--ink-2);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:8px 10px;margin:12px 16px 0}
+.disclaimer svg{width:16px;height:16px;flex:none;color:var(--cc);margin-top:2px}
+.dtabs{display:flex;gap:4px;padding:12px 16px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.dtabs button{border:0;background:none;padding:8px 10px;font-weight:700;color:var(--ink-2);border-bottom:3px solid transparent;margin-bottom:-1px;font-size:13px}
+.dtabs button[aria-current="true"]{color:var(--ink);border-color:var(--pin)}
+.menus{list-style:none;margin:0;padding:12px 16px 20px;display:grid;gap:10px}
+.mcard{border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:8px;background:var(--surface)}
+.mcard.ng{background:color-mix(in srgb,var(--ng-soft) 35%,var(--surface))}
+.mtop{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.mname{font-weight:700;font-size:15px}
+.price{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mmore{border:0;background:none;color:var(--sage);font-weight:700;font-size:12.5px;padding:0;justify-self:start;display:inline-flex;align-items:center;gap:4px}
+.mmore svg{width:14px;height:14px;transition:transform .15s}
+.mmore[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ing{background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:12.5px;display:grid;gap:6px}
+.ing dt{font-size:11px;color:var(--ink-2);font-weight:700}
+.ing dd{margin:0}
+.ing dl{margin:0;display:grid;gap:6px}
+.checked{font-size:11px;color:var(--ink-2)}
+.info-list{list-style:none;margin:0;padding:12px 16px 20px;display:grid;gap:10px}
+.info-list li{display:grid;grid-template-columns:84px 1fr;gap:8px;font-size:13px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.info-list li span:first-child{color:var(--ink-2);font-size:12px}
+.quote{margin:0 16px 20px;background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:13px}
+.quote b{display:block;font-size:11px;color:var(--sage);margin-bottom:2px}
+
+/* reviews */
+.rv{list-style:none;margin:0;padding:12px 16px 4px;display:grid;gap:10px}
+.rv li{border-bottom:1px solid var(--line);padding-bottom:10px;display:grid;gap:4px}
+.stars{color:var(--pin);letter-spacing:1px;font-size:13px}
+.stars .off{color:var(--line)}
+.rvform{margin:8px 16px 20px;border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:10px}
+.starpick{display:flex;gap:2px}
+.starpick button{border:0;background:none;font-size:26px;line-height:1;color:var(--line);padding:0 2px}
+.starpick button.on{color:var(--pin)}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px}
+.tagpick button{border:1px solid var(--line);background:var(--surface);border-radius:99px;font-size:12px;padding:3px 10px}
+.tagpick button[aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage);color:var(--sage-deep);font-weight:700}
+textarea,input[type=text],input[type=number],select{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;outline:none}
+textarea:focus,input:focus,select:focus{border-color:var(--sage)}
+textarea{resize:vertical;min-height:70px}
+label.f{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--ink-2)}
+
+/* QR */
+.scanner{margin:16px;border-radius:20px;background:#1b201c;aspect-ratio:4/3;max-width:100%;position:relative;overflow:hidden;display:grid;place-items:center}
+.scanner .frame{width:52%;aspect-ratio:1;position:relative}
+.scanner .frame::before,.scanner .frame::after{content:"";position:absolute;inset:0;border:3px solid #fff;border-radius:14px;clip-path:polygon(0 0,28% 0,28% 6%,6% 6%,6% 28%,0 28%,0 72%,6% 72%,6% 94%,28% 94%,28% 100%,72% 100%,72% 94%,94% 94%,94% 72%,100% 72%,100% 28%,94% 28%,94% 6%,72% 6%,72% 0,100% 0,100% 100%,0 100%)}
+.scanner .frame::after{display:none}
+.scanner .line{position:absolute;left:8%;right:8%;height:2px;background:#f07c55;top:50%;box-shadow:0 0 12px #f07c55}
+.scanner.busy .line{animation:scan .9s ease-in-out infinite alternate}
+@keyframes scan{from{top:10%}to{top:90%}}
+.scanner .hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#e8ece6;font-size:12px}
+.scanner .held{position:absolute;inset:0;display:grid;place-items:center}
+.scanner .held svg{width:40%;border-radius:6px}
+.qrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;padding:0 16px 20px}
+.qrpick{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px;display:grid;gap:6px;justify-items:center;text-align:center;font-size:11.5px;font-weight:700}
+.qrpick:hover{border-color:var(--sage)}
+.qrpick svg{width:64px;height:64px}
+svg.qr .qr-bg{fill:var(--qr-bg)} svg.qr .qr-fg{fill:var(--qr-fg)}
+.pop{margin:16px;border-radius:22px;background:var(--surface-2);padding:22px 18px;display:grid;justify-items:center;gap:10px;text-align:center}
+.pop .qrbox{background:var(--qr-bg);border-radius:16px;padding:10px;width:200px;max-width:100%}
+.pop .qrbox svg{width:100%;display:block}
+.pop h3{font-size:20px;font-weight:900}
+
+/* profile */
+.algrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.algrid button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 2px;font-size:13px;font-weight:700;display:grid;gap:0;justify-items:center}
+.algrid button small{font-size:9.5px;font-weight:500;color:var(--ink-2)}
+.algrid button[aria-pressed="true"]{border-color:var(--ng);background:var(--ng-soft);color:var(--ng)}
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px}
+
+/* store */
+.storebar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface-2);font-size:12px}
+.storebar select{width:auto;flex:1;min-width:0;padding:5px 8px;font-weight:700}
+.remind{margin:14px 16px 0;border-radius:16px;padding:12px 14px;background:var(--cc-soft);color:var(--ink);display:grid;gap:8px}
+.remind.good{background:var(--ok-soft)}
+.remind .h{display:flex;gap:8px;align-items:center;font-weight:700}
+.remind .h svg{width:18px;height:18px;flex:none;color:var(--cc)}
+.remind.good .h svg{color:var(--ok)}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px 16px 0}
+.tile{background:var(--surface-2);border-radius:14px;padding:10px 12px}
+.tile .k{font-size:11px;color:var(--ink-2);font-weight:700}
+.tile .v{font-family:var(--f-display);font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile .v small{font-size:12px;font-weight:700;margin-left:2px}
+.tile .delta{font-size:11px;color:var(--ok);font-weight:700}
+.panel{margin:14px 16px 0;border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.panel h3{font-size:14px;margin-bottom:2px}
+.panel .cap{font-size:11px;color:var(--ink-2);margin-bottom:8px}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:48px 1fr 36px;align-items:center;gap:8px;font-size:12px}
+.bar .tr{height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar .fl{height:100%;border-radius:99px;background:var(--sage)}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);align-items:end;gap:6px;height:90px}
+.week div{display:grid;gap:3px;justify-items:center;align-self:stretch;grid-template-rows:1fr auto}
+.week i{display:block;width:100%;max-width:26px;border-radius:6px 6px 2px 2px;background:var(--sage-soft);align-self:end}
+.week div:last-child i{background:var(--pin)}
+.week span{font-size:10px;color:var(--ink-2)}
+.smenus{list-style:none;margin:0;padding:12px 16px 20px;display:grid;gap:8px}
+.smenus li{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;gap:6px}
+.srow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.srow .grow{flex:1}
+
+/* editor */
+.editor{position:absolute;inset:0;background:var(--surface);z-index:40;display:flex;flex-direction:column}
+.editor .ehead{flex:none;display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.editor .ehead h2{font-size:16px;flex:1}
+.editor .ebody{flex:1;overflow:auto;padding:14px 16px 20px;display:grid;gap:14px;align-content:start}
+.editor .efoot{flex:none;display:flex;gap:8px;padding:10px 16px 12px;border-top:1px solid var(--line)}
+.editor .efoot .btn{flex:1}
+.photo{border:1.5px dashed var(--sage);border-radius:16px;padding:12px;display:grid;gap:8px;background:var(--surface-2)}
+.photo .row{display:flex;gap:8px;flex-wrap:wrap}
+.photo .row>*{flex:1}
+.photo img{border-radius:10px;max-height:140px;object-fit:cover;width:100%}
+.label-mock{background:#fbfaf4;color:#2a2a2a;border:1px solid #d9d6c8;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.6;font-family:var(--f-body)}
+.label-mock b{display:block;border-bottom:1px solid #2a2a2a;margin-bottom:4px}
+.ocr{font-size:12px;font-weight:700;color:var(--sage-deep);display:flex;align-items:center;gap:6px}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--sage-soft);border-top-color:var(--sage);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.altoggle{display:flex;flex-wrap:wrap;gap:8px 6px;padding-top:8px}
+.altoggle button{border:1.5px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 11px;font-size:12.5px;font-weight:700;position:relative}
+.altoggle button[aria-pressed="true"]{border-color:var(--ng);background:var(--ng-soft);color:var(--ng)}
+.altoggle.cc button[aria-pressed="true"]{border-color:var(--cc);background:var(--cc-soft);color:var(--cc)}
+.altoggle button.auto::after{content:"自動";position:absolute;top:-8px;right:-6px;font-size:9px;background:var(--sage);color:var(--on-sage);border-radius:99px;padding:0 5px;line-height:15px}
+.fieldnote{font-size:11px;color:var(--ink-2);font-weight:400}
+details.more summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--ink-2)}
+details.more[open] summary{margin-bottom:8px}
+
+.toast{position:absolute;left:50%;bottom:76px;transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:80;text-align:center;width:max-content;max-width:86%;line-height:1.5}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.empty{padding:40px 24px;text-align:center;color:var(--ink-2);display:grid;gap:8px;justify-items:center}
+.empty svg{width:40px;height:40px;color:var(--pin-off)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <aside class="guide" id="guide" aria-label="デモの流れ">
+    <button class="icon-btn guide-close" data-act="toggle-guide" aria-label="閉じる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div>
+      <div class="eyebrow">PROTOTYPE DEMO</div>
+      <h1>ふらっとごはん</h1>
+      <div class="sub">〜原材料が見える飲食店マップ〜</div>
+    </div>
+    <div class="note">お店・メニュー・口コミ・数値はすべて架空のデモデータです。地図は実在の地図データを使わないイメージ図です。入力した内容はこのブラウザの中にだけ保存されます。</div>
+    <div class="flow">
+      <h3><span>利用者</span>タップするとその画面へ移動します</h3>
+      <ol>
+        <li><button data-act="guide:u1"><span class="num"><b>1</b></span><span><span class="t">地図で探す</span><br><span class="d">避けたい原材料を選ぶと、安心して食べられるメニューの数がピンに出ます</span></span></button></li>
+        <li><button data-act="guide:u2"><span class="num"><b>2</b></span><span><span class="t">原材料を確認</span><br><span class="d">メニューごとに原材料・アレルゲン・最新確認日を表示</span></span></button></li>
+        <li><button data-act="guide:u3"><span class="num"><b>3</b></span><span><span class="t">来店を決める</span><br><span class="d">「行きたい」に保存して一覧で見返せます</span></span></button></li>
+        <li><button data-act="guide:u4"><span class="num"><b>4</b></span><span><span class="t">店頭でQR確認</span><br><span class="d">卓上のQRを読み取ると、そのお店のメニュー表示が開きます</span></span></button></li>
+        <li><button data-act="guide:u5"><span class="num"><b>5</b></span><span><span class="t">口コミを投稿</span><br><span class="d">評価と「原材料がわかりやすかった」などのタグで投稿</span></span></button></li>
+      </ol>
+    </div>
+    <div class="flow">
+      <h3><span>店舗</span></h3>
+      <ol>
+        <li><button data-act="guide:s1"><span class="num"><b>1</b></span><span><span class="t">登録</span><br><span class="d">原材料表示の写真から入力。アレルゲンは自動でチェック</span></span></button></li>
+        <li><button data-act="guide:s2"><span class="num"><b>2</b></span><span><span class="t">更新</span><br><span class="d">週1回のリマインドと「変更なし」のワンタップ確認</span></span></button></li>
+        <li><button data-act="guide:s3"><span class="num"><b>3</b></span><span><span class="t">データの還元</span><br><span class="d">閲覧数・QR読み取り数・よく避けられている原材料</span></span></button></li>
+      </ol>
+    </div>
+  </aside>
+
+  <div class="app" id="app">
+    <header class="top">
+      <div class="brand"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>ふらっとごはん</div>
+      <div class="seg" role="group" aria-label="表示の切り替え">
+        <button id="seg-user" data-act="mode:user">利用者</button>
+        <button id="seg-store" data-act="mode:store">店舗</button>
+      </div>
+      <button class="icon-btn guide-btn" data-act="toggle-guide" aria-label="デモの流れ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg></button>
+    </header>
+    <main class="main" id="main"></main>
+    <nav class="tabbar" id="tabbar"></nav>
+    <div id="editorSlot"></div>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const z2 = n => String(n).padStart(2,'0');
+const iso = d => d.getFullYear()+'-'+z2(d.getMonth()+1)+'-'+z2(d.getDate());
+const dayOffset = n => { const d = new Date(TODAY); d.setDate(d.getDate()+n); return iso(d); };
+const daysSince = s => Math.round((TODAY - new Date(s+'T00:00:00'))/86400000);
+const md = s => { const p = s.split('-'); return (+p[1])+'/'+(+p[2]); };
+const yen = n => '¥'+Number(n).toLocaleString('ja-JP');
+let uidN = 0; const uid = () => 'm'+Date.now().toString(36)+(uidN++);
+
+const IC = {
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+  heartF:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+  qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  locate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+  pinE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>'
+};
+
+/* ---------- master data ---------- */
+const ALLERGENS = [
+  {id:'egg',label:'卵',req:1,kw:['卵','鶏卵','卵黄','卵白','マヨネーズ']},
+  {id:'milk',label:'乳',req:1,kw:['牛乳','乳製品','バター','チーズ','生クリーム','ヨーグルト','脱脂粉乳','ギー']},
+  {id:'wheat',label:'小麦',req:1,kw:['小麦','パン粉','醤油','しょうゆ','スパゲッティ','食パン','うどん','ルウ','天ぷら粉','甜麺醤']},
+  {id:'shrimp',label:'えび',req:1,kw:['えび','エビ','海老']},
+  {id:'crab',label:'かに',req:1,kw:['かに','カニ','蟹']},
+  {id:'buckwheat',label:'そば',req:1,kw:['そば粉','蕎麦']},
+  {id:'peanut',label:'落花生',req:1,kw:['落花生','ピーナッツ']},
+  {id:'walnut',label:'くるみ',req:1,kw:['くるみ','クルミ']},
+  {id:'soy',label:'大豆',kw:['大豆','醤油','しょうゆ','味噌','みそ','豆腐','豆乳','豆板醤','甜麺醤']},
+  {id:'sesame',label:'ごま',kw:['ごま','ゴマ','胡麻']},
+  {id:'beef',label:'牛肉',kw:['牛肉','牛ひき肉','合いびき肉']},
+  {id:'pork',label:'豚肉',kw:['豚肉','豚ロース','豚ひき肉','合いびき肉','ベーコン','ハム','チャーシュー']},
+  {id:'chicken',label:'鶏肉',kw:['鶏肉','鶏もも','鶏むね','チキン','鶏ガラ']},
+  {id:'salmon',label:'さけ',kw:['鮭','さけ','サーモン']},
+  {id:'mackerel',label:'さば',kw:['さば','サバ','鯖']},
+  {id:'apple',label:'りんご',kw:['りんご','リンゴ']}
+];
+const AL = Object.fromEntries(ALLERGENS.map(a => [a.id,a]));
+const alName = id => AL[id] ? AL[id].label : id;
+const detect = text => ALLERGENS.filter(a => a.kw.some(k => text.includes(k))).map(a => a.id);
+
+const USER_LOC = {x:430, y:590};
+const REVIEW_TAGS = ['原材料がわかりやすかった','店員さんの対応が丁寧','子ども連れでも安心','表示と実際が違った'];
+
+function m(name, price, ing, al, cc, off, note){ return {id:uid(), name, price, ing, al, cc, checked:dayOffset(off), note:note||''}; }
+function seed(){
+  const shops = [
+    {id:'s1',name:'洋食キッチン こもれび',short:'洋',genre:'洋食',x:545,y:490,hours:'11:00–15:00 / 17:30–21:00',seats:'カウンター6・テーブル12',addr:'千代田区神田神保町（架空の住所）',msg:'ソースは店で一から作っています。気になることがあれば、アプリを見せながら気軽に聞いてください。',menus:[
+      m('オムライス',980,'米、鶏もも肉、玉ねぎ、卵、トマトケチャップ（トマト、砂糖、醸造酢、食塩）、バター、食塩',['egg','milk','chicken'],[],-3),
+      m('手ごねハンバーグ',1180,'合いびき肉（牛肉・豚肉）、玉ねぎ、パン粉、卵、牛乳、デミグラスソース（小麦粉、トマト、赤ワイン）',['beef','pork','wheat','egg','milk'],[],-3),
+      m('ナポリタン',950,'スパゲッティ（小麦）、ベーコン、ピーマン、玉ねぎ、トマトケチャップ、粉チーズ',['wheat','pork','milk'],[],-3),
+      m('トマトと夏野菜のライス',900,'米、トマト、なす、ズッキーニ、オリーブオイル、食塩',[],[],-3,'専用のフライパンで調理しています。')
+    ]},
+    {id:'s2',name:'手打ちそば 一灯庵',short:'蕎',genre:'そば',x:296,y:360,hours:'11:00–14:30（売り切れ次第終了）',seats:'テーブル16',addr:'千代田区神田神保町（架空の住所）',msg:'十割そばは前日までにご予約ください。茹で釜は1つです。',menus:[
+      m('ざるそば',850,'そば粉、小麦粉、そばつゆ（醤油、みりん、かつお節）',['buckwheat','wheat','soy'],[],-7),
+      m('天ぷらそば',1350,'そば粉、小麦粉、えび、卵、天ぷら粉、そばつゆ（醤油、みりん）',['buckwheat','wheat','shrimp','egg','soy'],[],-7),
+      m('十割そば（要予約）',1100,'そば粉、そばつゆ（醤油、みりん、かつお節）',['buckwheat','soy','wheat'],[],-7,'つゆの醤油に小麦が含まれます。'),
+      m('親子丼',950,'米、鶏もも肉、卵、玉ねぎ、醤油、みりん',['chicken','egg','soy','wheat'],['buckwheat'],-7,'そばと同じ厨房で調理しています。')
+    ]},
+    {id:'s3',name:'カレー食堂 すぱいす小路',short:'カ',genre:'カレー',x:421,y:660,hours:'11:30–15:00 / 18:00–21:30',seats:'カウンター10',addr:'千代田区神田神保町（架空の住所）',msg:'ルウは使わず、米粉でとろみをつけています。小麦を使うのはナンだけです。',menus:[
+      m('チキンカレー',1000,'鶏もも肉、玉ねぎ、トマト、ヨーグルト、スパイス、米粉、食塩',['chicken','milk'],[],-1),
+      m('豆と野菜のカレー',950,'ひよこ豆、じゃがいも、玉ねぎ、トマト、ココナッツミルク、スパイス、食塩',[],['milk'],-1,'乳を使うカレーと同じ鍋で調理する日があります。'),
+      m('キーマカレー',1050,'合いびき肉（牛肉・豚肉）、玉ねぎ、グリーンピース、スパイス、ギー',['beef','pork','milk'],[],-1),
+      m('ナン',300,'小麦粉、牛乳、卵、砂糖、食塩',['wheat','milk','egg'],[],-1)
+    ]},
+    {id:'s4',name:'定食 まるや',short:'定',genre:'定食',x:670,y:490,hours:'11:00–20:00',seats:'テーブル20',addr:'千代田区神田神保町（架空の住所）',msg:'揚げ油は1種類です。揚げ物はえびと同じ油を使っています。',menus:[
+      m('豚の生姜焼き定食',980,'豚ロース、生姜、醤油、みりん、米、味噌汁（味噌、豆腐、わかめ）',['pork','soy','wheat'],[],-21),
+      m('さばの塩焼き定食',1050,'さば、食塩、大根おろし、米、味噌汁（味噌、豆腐、わかめ）',['mackerel','soy'],[],-21),
+      m('鶏の唐揚げ定食',980,'鶏もも肉、醤油、にんにく、小麦粉、片栗粉、米、味噌汁（味噌、豆腐）',['chicken','soy','wheat'],['shrimp'],-21,'えびフライと同じ揚げ油を使っています。')
+    ]},
+    {id:'s5',name:'パスタ工房 トマティーナ',short:'伊',genre:'イタリアン',x:296,y:760,hours:'11:30–15:00 / 17:30–22:00',seats:'テーブル24',addr:'千代田区神田神保町（架空の住所）',msg:'米粉パスタは専用の鍋で茹でています。',menus:[
+      m('トマトパスタ',1100,'スパゲッティ（小麦）、トマト、にんにく、オリーブオイル、バジル、食塩',['wheat'],[],-2),
+      m('ジェノベーゼ',1250,'スパゲッティ（小麦）、バジル、くるみ、粉チーズ、オリーブオイル、にんにく',['wheat','walnut','milk'],[],-2),
+      m('カルボナーラ',1300,'スパゲッティ（小麦）、ベーコン、卵黄、粉チーズ、生クリーム、黒こしょう',['wheat','pork','egg','milk'],[],-2),
+      m('米粉パスタのトマトソース',1200,'米粉パスタ（米粉）、トマト、にんにく、オリーブオイル、食塩',[],[],-2,'専用の鍋と器具で調理しています。')
+    ]},
+    {id:'s6',name:'ベーカリーカフェ こむぎ舎',short:'パ',genre:'パン・カフェ',x:545,y:760,hours:'8:00–18:00',seats:'カウンター8',addr:'千代田区神田神保町（架空の住所）',msg:'同じ工房で小麦・卵・乳・くるみを扱っています。',menus:[
+      m('たまごサンド',520,'食パン（小麦粉、バター、砂糖、食塩）、卵、マヨネーズ',['wheat','milk','egg'],[],-5),
+      m('くるみパン',320,'小麦粉、くるみ、バター、砂糖、酵母',['wheat','walnut','milk'],[],-5),
+      m('ハムチーズサンド',560,'食パン（小麦粉、バター）、ハム、チーズ',['wheat','milk','pork'],[],-5),
+      m('りんごのコンポート',400,'りんご、砂糖、レモン果汁',['apple'],['wheat','egg','milk','walnut'],-5,'パンと同じ工房で作っています。')
+    ]},
+    {id:'s7',name:'中華料理 龍華',short:'中',genre:'中華',x:170,y:660,hours:'11:00–22:00',seats:'テーブル30',addr:'千代田区九段南（架空の住所）',msg:'中華鍋は共用です。えび・かにを使う料理と同じ鍋で調理します。',menus:[
+      m('麻婆豆腐',980,'豆腐、豚ひき肉、豆板醤、甜麺醤、醤油、ごま油、長ねぎ',['soy','pork','wheat','sesame'],['shrimp','crab'],-9),
+      m('卵チャーハン',850,'米、卵、長ねぎ、チャーシュー、醤油、食塩',['egg','pork','soy','wheat'],['shrimp','crab'],-9),
+      m('エビチリ',1280,'えび、トマトケチャップ、豆板醤、卵白、片栗粉',['shrimp','egg','soy'],['crab'],-9),
+      m('青菜炒め',700,'小松菜、にんにく、食塩、ごま油',['sesame'],['shrimp','crab'],-9)
+    ]},
+    {id:'s8',name:'おむすび ひだまり',short:'む',genre:'おむすび',x:545,y:360,hours:'7:30–14:00',seats:'持ち帰り中心・ベンチ4',addr:'千代田区神田神保町（架空の住所）',msg:'お米と塩と海苔だけで作るおむすびもあります。',menus:[
+      m('塩むすび',180,'米、食塩、海苔',[],[],0),
+      m('鮭むすび',220,'米、鮭、食塩、海苔',['salmon'],[],0),
+      m('ツナマヨむすび',230,'米、ツナ、マヨネーズ（卵を含む）、海苔',['egg'],[],0),
+      m('豚汁',300,'豚肉、大根、にんじん、ごぼう、味噌',['pork','soy'],[],0)
+    ]}
+  ];
+  const R = (stars,tags,text,off,by) => ({stars,tags,text,date:dayOffset(off),by});
+  const reviews = {
+    s1:[R(5,[0,1],'卵と乳を使っていないメニューが一目でわかって、初めてでも安心して注文できました。',-4,'20代・卵アレルギー'),R(4,[2],'子どもの分を事前に決めてから行けたので、お店で慌てずに済みました。',-12,'子どもの親')],
+    s2:[R(4,[1],'茹で釜が1つと書いてあったので、そばアレルギーの友人とは別のお店にしました。正直に書いてあるのが助かります。',-6,'20代')],
+    s3:[R(5,[0],'米粉でとろみと知って小麦アレルギーでも食べられました。',-2,'20代・小麦アレルギー')],
+    s5:[R(5,[0,1],'米粉パスタが専用鍋なのがうれしいです。',-8,'30代')],
+    s8:[R(5,[2],'塩むすびは原材料が3つだけ。子どもと安心して寄れます。',-1,'子どもの親')]
+  };
+  const stats = {};
+  shops.forEach((s,i) => { stats[s.id] = {views:180+((i*97)%190), qr:22+((i*31)%40), saved:9+((i*13)%25)}; });
+  stats.s1 = {views:312, qr:48, saved:27};
+  return {v:1, shops, reviews, favs:[], profile:['egg'], strict:true, storeId:'s1', stats};
+}
+
+/* ---------- state ---------- */
+const KEY = 'furatto-gohan-demo-v1';
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
+if (!S || S.v !== 1 || !Array.isArray(S.shops)) S = seed();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} };
+
+const ui = {mode:'user', tab:'map', stab:'home', shop:null, shopTab:'menu', fromQR:null, sel:null, open:new Set(), onlyOk:false, menuOnlyOk:false, q:'', review:{stars:0,tags:[]}, resetAsk:false, ed:null, scanning:false};
+
+const shopById = id => S.shops.find(s => s.id === id);
+function statusOf(menu){
+  const P = S.profile;
+  const hit = menu.al.filter(a => P.includes(a));
+  if (hit.length) return {k:'ng', hit};
+  const cc = menu.cc.filter(a => P.includes(a));
+  if (cc.length) return {k:'cc', hit:cc};
+  return {k:'ok', hit:[]};
+}
+const isSafe = menu => { const k = statusOf(menu).k; return k === 'ok' || (k === 'cc' && !S.strict); };
+const okCount = shop => shop.menus.filter(isSafe).length;
+const lastChecked = shop => shop.menus.reduce((a,mm) => mm.checked < a ? mm.checked : a, '9999-12-31');
+const walkMin = shop => Math.max(1, Math.round(Math.hypot(shop.x-USER_LOC.x, shop.y-USER_LOC.y)*1.3/80));
+function freshPill(dateStr){
+  if (dateStr === '9999-12-31') return '';
+  const d = daysSince(dateStr);
+  const txt = d <= 0 ? '今日' : d + '日前';
+  return `<span class="pill ${d >= 14 ? 'old' : 'fresh'}">最新確認 ${md(dateStr)}（${txt}）</span>`;
+}
+function statusPill(menu){
+  const st = statusOf(menu);
+  if (!S.profile.length) return '';
+  if (st.k === 'ng') return `<span class="pill ng">${IC.x}${esc(st.hit.map(alName).join('・'))}を含む</span>`;
+  if (st.k === 'cc') return `<span class="pill cc">${IC.alert}調理場で混ざる可能性</span>`;
+  return `<span class="pill ok">${IC.check}避けたい原材料なし</span>`;
+}
+function alChips(menu){
+  const P = S.profile;
+  const a = menu.al.map(id => `<span class="chip ${P.includes(id)?'hit':''}">${esc(alName(id))}</span>`).join('');
+  return a || '<span class="chip">特定原材料などの使用なし</span>';
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+
+/* ---------- QR ---------- */
+function qrSvg(text){
+  try {
+    const q = qrcode(0,'M'); q.addData(text); q.make();
+    const n = q.getModuleCount(); let d = '';
+    for (let r=0;r<n;r++) for (let c=0;c<n;c++) if (q.isDark(r,c)) d += `M${c} ${r}h1v1h-1z`;
+    return `<svg class="qr" viewBox="-2 -2 ${n+4} ${n+4}" role="img" aria-label="QRコード" shape-rendering="crispEdges"><rect class="qr-bg" x="-2" y="-2" width="${n+4}" height="${n+4}"/><path class="qr-fg" d="${d}"/></svg>`;
+  } catch(e) {
+    return `<svg class="qr" viewBox="0 0 10 10"><rect class="qr-bg" width="10" height="10"/><text x="5" y="5.5" font-size="1.4" text-anchor="middle" class="qr-fg">QR</text></svg>`;
+  }
+}
+const qrText = (shopId, table) => `https://furatto-gohan.example/s/${shopId}?table=${table}`;
+
+/* ---------- map ---------- */
+const MAP_W = 800, MAP_TOP = 110, MAP_BOTTOM = 1000;
+const XS = [110,230,362,480,610,730], YS = [210,300,420,560,700,820,920];
+const MAJOR_X = 362, MAJOR_Y = 560;
+let vb = {x:120, y:300, w:560, h:600};
+const mapWrap = document.createElement('div');
+mapWrap.className = 'mapwrap';
+function buildMapSVG(){
+  let blocks = '';
+  const xb = [-200].concat(XS, [1000]), yb = [175].concat(YS, [1100]);
+  for (let i=0;i<xb.length-1;i++) for (let j=0;j<yb.length-1;j++){
+    const x0 = xb[i], x1 = xb[i+1], y0 = yb[j], y1 = yb[j+1];
+    const gx = (x0===MAJOR_X||x1===MAJOR_X)?16:9, gy0 = y0===MAJOR_Y?16:(j===0?6:9), gy1 = y1===MAJOR_Y?16:9;
+    const isCampus = x0===362 && y0===420;
+    const isPark = x1===110 && (y0===210 || y0===300);
+    if (isCampus || isPark) continue;
+    blocks += `<rect class="m-block" x="${x0+gx}" y="${y0+gy0}" width="${x1-x0-gx*2}" height="${y1-y0-gy0-gy1}" rx="8"/>`;
+  }
+  let roads = '', cas = '';
+  XS.forEach(x => { if (x===MAJOR_X) return; cas += `<path class="m-casing" stroke-width="16" d="M${x} 175V1100"/>`; roads += `<path class="m-road" stroke-width="12" d="M${x} 175V1100"/>`; });
+  YS.forEach(y => { if (y===MAJOR_Y) return; cas += `<path class="m-casing" stroke-width="16" d="M-200 ${y}H1000"/>`; roads += `<path class="m-road" stroke-width="12" d="M-200 ${y}H1000"/>`; });
+  const major = `<path class="m-casing" stroke-width="32" d="M-200 ${MAJOR_Y}H1000M${MAJOR_X} 60V1100"/><path class="m-major" stroke-width="26" d="M-200 ${MAJOR_Y}H1000M${MAJOR_X} 60V1100"/>`;
+  return `<svg class="map" id="mapsvg" xmlns="http://www.w3.org/2000/svg" aria-label="神田キャンパス周辺のイメージ地図">
+    <rect class="m-land" x="-400" y="-200" width="1600" height="1500"/>
+    <path class="m-water" d="M-400 120 C 0 95, 300 160, 520 118 S 900 80 1200 100 L1200 160 C 900 140 700 182 520 176 S 0 160 -400 178Z"/>
+    ${blocks}
+    <path class="m-park" d="M-200 222 L96 222 Q98 222 98 226 L98 404 Q98 408 94 408 L-200 408Z"/>
+    <rect class="m-campus" x="378" y="436" width="86" height="108" rx="10"/>
+    ${cas}${roads}${major}
+    <text class="m-label sm" x="20" y="320">公園</text>
+    <text class="m-label sm" x="560" y="146">川</text>
+    <text class="m-label sm" x="421" y="482" text-anchor="middle">専修大学</text>
+    <text class="m-label sm" x="421" y="500" text-anchor="middle">神田</text>
+    <text class="m-label sm" x="421" y="516" text-anchor="middle">キャンパス</text>
+    <text class="m-label" x="560" y="${MAJOR_Y+5}">靖国通り</text>
+    <text class="m-label" x="${MAJOR_X+5}" y="790" transform="rotate(90 ${MAJOR_X+5} 790)" text-anchor="middle" dy="0">白山通り</text>
+    <g><circle class="m-sta" cx="${MAJOR_X}" cy="${MAJOR_Y}" r="13"/><text class="m-sta-t" x="${MAJOR_X}" y="${MAJOR_Y}">駅</text><text class="m-label sm" x="${MAJOR_X-18}" y="${MAJOR_Y-20}" text-anchor="end">神保町駅</text></g>
+    <g><circle class="m-sta" cx="40" cy="${MAJOR_Y}" r="13"/><text class="m-sta-t" x="40" y="${MAJOR_Y}">駅</text><text class="m-label sm" x="58" y="${MAJOR_Y-20}">九段下駅</text></g>
+    <g id="loc"><circle class="loc-ring" cx="${USER_LOC.x}" cy="${USER_LOC.y}" r="26"/><circle class="loc-dot" cx="${USER_LOC.x}" cy="${USER_LOC.y}" r="8"/></g>
+    <g id="pins"></g>
+  </svg>
+  <div class="maptag">イメージ地図（実在の地図ではありません）</div>
+  <div class="mapctl">
+    <button data-act="zoom:in" aria-label="拡大">${IC.plus}</button>
+    <button data-act="zoom:out" aria-label="縮小">${IC.minus}</button>
+    <button data-act="locate" aria-label="現在地へ">${IC.locate}</button>
+  </div>
+  <div id="mapcard"></div>`;
+}
+mapWrap.innerHTML = buildMapSVG();
+const svg = mapWrap.querySelector('#mapsvg');
+
+function fitAspect(){
+  const r = svg.getBoundingClientRect();
+  if (r.width < 10 || r.height < 10) return;
+  const cx = vb.x + vb.w/2, cy = vb.y + vb.h/2;
+  vb.h = vb.w * r.height / r.width;
+  vb.x = cx - vb.w/2; vb.y = cy - vb.h/2;
+}
+function clampVB(){
+  vb.w = Math.min(Math.max(vb.w, 220), 1000);
+  const r = svg.getBoundingClientRect();
+  if (r.width > 10) vb.h = vb.w * r.height / r.width;
+  const minX = -60, maxX = MAP_W + 60 - vb.w, minY = MAP_TOP, maxY = MAP_BOTTOM - vb.h;
+  vb.x = maxX < minX ? (minX+maxX)/2 : Math.min(Math.max(vb.x, minX), maxX);
+  vb.y = maxY < minY ? (minY+maxY)/2 : Math.min(Math.max(vb.y, minY), maxY);
+}
+function applyVB(){
+  clampVB();
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const r = svg.getBoundingClientRect();
+  const k = r.width > 10 ? vb.w / r.width : 1;
+  svg.querySelectorAll('.pin').forEach(p => p.setAttribute('transform', `translate(${p.dataset.x} ${p.dataset.y}) scale(${(p.classList.contains('sel')?1.25:1)*k})`));
+  const loc = svg.querySelector('#loc');
+  loc.setAttribute('transform', `translate(${USER_LOC.x} ${USER_LOC.y}) scale(${k}) translate(${-USER_LOC.x} ${-USER_LOC.y})`);
+}
+function renderPins(){
+  const list = visibleShops();
+  const ids = new Set(list.map(s => s.id));
+  const sorted = S.shops.filter(s => ids.has(s.id)).sort((a,b) => (a.id===ui.sel) - (b.id===ui.sel));
+  svg.querySelector('#pins').innerHTML = sorted.map(s => {
+    const n = S.profile.length ? okCount(s) : s.menus.length;
+    return `<g class="pin ${n?'':'off'} ${ui.sel===s.id?'sel':''}" data-pin="${s.id}" data-x="${s.x}" data-y="${s.y}" role="button" aria-label="${esc(s.name)}">
+      <path d="M0 0C-5-10-15-17-15-29A15 15 0 1 1 15-29C15-17 5-10 0 0Z"/><circle class="hole" cx="0" cy="-29" r="6"/>
+      <circle class="badge" cx="13" cy="-42" r="10"/><text class="bt" x="13" y="-41.5">${n}</text></g>`;
+  }).join('');
+  applyVB();
+  const card = mapWrap.querySelector('#mapcard');
+  const s = ui.sel && shopById(ui.sel);
+  card.innerHTML = s ? `<div class="mapcard"><div class="info"><div class="nm">${esc(s.name)}</div><div class="small muted">${esc(s.genre)}・徒歩${walkMin(s)}分・${S.profile.length?`安心メニュー ${okCount(s)}/${s.menus.length}品`:`メニュー ${s.menus.length}品`}</div></div><button class="btn sm" data-act="open:${s.id}">原材料を見る</button></div>` : '';
+}
+function centerOn(x, y, w){ if (w) vb.w = w; const r = svg.getBoundingClientRect(); vb.h = vb.w * (r.height||1) / (r.width||1); vb.x = x - vb.w/2; vb.y = y - vb.h/2; applyVB(); }
+function zoomAt(f, cx, cy){
+  const nw = Math.min(Math.max(vb.w * f, 220), 1000); const ff = nw / vb.w;
+  vb.x = cx - (cx - vb.x) * ff; vb.y = cy - (cy - vb.y) * ff; vb.w = nw; applyVB();
+}
+const toMap = (clientX, clientY) => { const r = svg.getBoundingClientRect(); return {x: vb.x + (clientX - r.left)/r.width*vb.w, y: vb.y + (clientY - r.top)/r.height*vb.h}; };
+(function bindMap(){
+  const pts = new Map(); let moved = 0, last = null, pinch = null;
+  svg.addEventListener('pointerdown', e => { pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); moved = 0; last = {x:e.clientX, y:e.clientY}; if (pts.size === 2){ const [a,b] = [...pts.values()]; pinch = {d:Math.hypot(a.x-b.x,a.y-b.y)}; } });
+  window.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    const r = svg.getBoundingClientRect();
+    if (pts.size === 2 && pinch){
+      const [a,b] = [...pts.values()]; const d = Math.hypot(a.x-b.x,a.y-b.y);
+      const c = toMap((a.x+b.x)/2, (a.y+b.y)/2); zoomAt(pinch.d/d, c.x, c.y); pinch.d = d; moved += 10; return;
+    }
+    if (pts.size === 1 && last){
+      const dx = e.clientX - last.x, dy = e.clientY - last.y; moved += Math.abs(dx) + Math.abs(dy);
+      vb.x -= dx / r.width * vb.w; vb.y -= dy / r.height * vb.h; last = {x:e.clientX, y:e.clientY}; applyVB();
+    }
+  });
+  const up = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
+    if (pts.size === 0){
+      if (moved < 8){
+        const pin = e.target.closest && e.target.closest('[data-pin]');
+        ui.sel = pin ? pin.dataset.pin : null; renderPins();
+      }
+      last = null;
+    } else { last = [...pts.values()][0]; }
+  };
+  window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  svg.addEventListener('wheel', e => { e.preventDefault(); const c = toMap(e.clientX, e.clientY); zoomAt(e.deltaY > 0 ? 1.12 : 1/1.12, c.x, c.y); }, {passive:false});
+  new ResizeObserver(() => { if (mapWrap.isConnected) applyVB(); }).observe(mapWrap);
+})();
+
+function visibleShops(){
+  const q = ui.q.trim();
+  return S.shops.filter(s => {
+    if (ui.onlyOk && S.profile.length && !okCount(s)) return false;
+    if (!q) return true;
+    return s.name.includes(q) || s.genre.includes(q) || s.menus.some(mm => mm.name.includes(q) || mm.ing.includes(q));
+  });
+}
+
+/* ---------- views: user ---------- */
+const main = $('#main');
+function renderMap(){
+  main.classList.add('is-map');
+  const avoid = S.profile.length ? S.profile.map(id => `<span class="chip hit">${esc(alName(id))}</span>`).join('') : '<span class="chip">未設定（すべて表示）</span>';
+  main.innerHTML = `
+    <div class="filterbar">
+      <label class="search">${IC.search}<input id="q" type="text" placeholder="店名・料理名で探す（例：パスタ）" value="${esc(ui.q)}" aria-label="検索"></label>
+      <div class="avoid"><span class="lbl">避けたい原材料</span><div class="chips">${avoid}</div><button class="edit" data-act="tab:me">変更</button></div>
+    </div>
+    <div id="mapSlot" style="display:contents"></div>
+    <div class="listwrap" id="listwrap"></div>`;
+  $('#mapSlot').appendChild(mapWrap);
+  renderList();
+  requestAnimationFrame(() => { fitAspect(); renderPins(); });
+  $('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); renderPins(); });
+}
+function renderList(){
+  const list = visibleShops().slice().sort((a,b) => (okCount(b) - okCount(a)) || (walkMin(a) - walkMin(b)));
+  const lw = $('#listwrap'); if (!lw) return;
+  lw.innerHTML = `
+    <div class="listhead"><b class="small">周辺のお店 ${list.length}件</b>
+      <button class="toggle" data-act="onlyok" aria-pressed="${ui.onlyOk}"><span class="sw"></span>安心メニューがある店だけ</button></div>
+    ${list.length ? `<ul class="shoplist">${list.map(shopRow).join('')}</ul>` : `<div class="empty">${IC.search}<div>条件に合うお店がありません。<br>検索語を変えるか、絞り込みを外してください。</div></div>`}`;
+}
+function shopRow(s){
+  const n = okCount(s), lc = lastChecked(s);
+  return `<li><button class="shoprow" data-act="open:${s.id}">
+    <span class="ic">${esc(s.short)}</span>
+    <span class="info"><span class="nm">${esc(s.name)}</span><span class="meta">${esc(s.genre)}・徒歩${walkMin(s)}分・確認 ${md(lc)}${daysSince(lc)>=14?'（要更新）':''}</span></span>
+    <span class="okcount ${n?'':'zero'}"><b>${S.profile.length?n:s.menus.length}</b><span>${S.profile.length?`安心/${s.menus.length}品`:'品'}</span></span>
+  </button></li>`;
+}
+
+function renderDetail(){
+  main.classList.remove('is-map');
+  const s = shopById(ui.shop); if (!s){ ui.shop = null; return render(); }
+  const fav = S.favs.includes(s.id);
+  const rv = S.reviews[s.id] || [];
+  const menus = ui.menuOnlyOk ? s.menus.filter(isSafe) : s.menus;
+  let body = '';
+  if (ui.shopTab === 'menu'){
+    body = `<div class="listhead" style="position:static"><span class="small muted">${S.profile.length?`避けたい：${esc(S.profile.map(alName).join('・'))}`:'避けたい原材料：未設定'}</span>
+      <button class="toggle" data-act="menuonly" aria-pressed="${ui.menuOnlyOk}"><span class="sw"></span>安心のみ</button></div>
+      <ul class="menus">${menus.map(mm => menuCard(mm)).join('') || '<li class="empty">条件に合うメニューがありません。</li>'}</ul>`;
+  } else if (ui.shopTab === 'review'){
+    const st = ui.review.stars;
+    body = `<ul class="rv">${rv.length ? rv.map(r => `<li><div class="srow"><span class="stars">${'★'.repeat(r.stars)}<span class="off">${'★'.repeat(5-r.stars)}</span></span><span class="small muted grow">${esc(r.by)}・${md(r.date)}</span></div>
+      ${r.tags.length?`<div class="chips">${r.tags.map(t => `<span class="chip">${esc(REVIEW_TAGS[t])}</span>`).join('')}</div>`:''}<div>${esc(r.text)}</div></li>`).join('') : '<li class="muted small">まだ口コミはありません。最初の口コミを投稿してみてください。</li>'}</ul>
+      <form class="rvform" id="rvform">
+        <b>口コミを投稿</b>
+        <div class="starpick" role="group" aria-label="評価">${[1,2,3,4,5].map(i => `<button type="button" class="${i<=st?'on':''}" data-act="star:${i}" aria-label="${i}点">★</button>`).join('')}</div>
+        <div class="tagpick">${REVIEW_TAGS.map((t,i) => `<button type="button" data-act="rtag:${i}" aria-pressed="${ui.review.tags.includes(i)}">${esc(t)}</button>`).join('')}</div>
+        <label class="f">コメント<textarea id="rvtext" placeholder="例：卵不使用のメニューがすぐわかりました"></textarea></label>
+        <button class="btn block" type="submit">投稿する</button>
+      </form>`;
+  } else {
+    body = `<ul class="info-list">
+      <li><span>ジャンル</span><span>${esc(s.genre)}</span></li>
+      <li><span>営業時間</span><span>${esc(s.hours)}</span></li>
+      <li><span>席</span><span>${esc(s.seats)}</span></li>
+      <li><span>住所</span><span>${esc(s.addr)}</span></li>
+      <li><span>原材料の確認</span><span>${md(lastChecked(s))} に店舗が確認</span></li></ul>
+      <div class="quote"><b>お店からのひとこと</b>${esc(s.msg)}</div>`;
+  }
+  main.innerHTML = `
+    ${ui.fromQR && ui.fromQR.shop === s.id ? `<div class="qrbanner">${IC.qr}店頭のQRから表示中（テーブル ${ui.fromQR.table}）。この画面を店員さんに見せて確認できます。</div>` : ''}
+    <div class="dhead">
+      <button class="back" data-act="back">${IC.back}${ui.fromQR ? 'QR読み取りに戻る' : '地図に戻る'}</button>
+      <h2>${esc(s.name)}</h2>
+      <div class="dmeta"><span>${esc(s.genre)}</span><span>徒歩${walkMin(s)}分</span><span>${esc(s.hours)}</span></div>
+      <div class="chips">${S.profile.length?`<span class="pill ${okCount(s)?'ok':'ng'}">${okCount(s)?IC.check:IC.x}安心メニュー ${okCount(s)}/${s.menus.length}品</span>`:''}${freshPill(lastChecked(s))}</div>
+      <div class="dactions">
+        <button class="btn ${fav?'faved':'ghost'}" data-act="fav:${s.id}">${fav?IC.heartF:IC.heart}${fav?'行きたい登録済み':'行きたい'}</button>
+        <button class="btn ghost" data-act="tab:qr">${IC.qr}店頭QR</button>
+      </div>
+    </div>
+    <div class="disclaimer">${IC.alert}<span>掲載内容はお店が登録した情報です。体調に関わる場合は、注文前に店員さんにも確認してください。</span></div>
+    <div class="dtabs" role="tablist">
+      <button data-act="stab-d:menu" aria-current="${ui.shopTab==='menu'}">メニュー（${s.menus.length}）</button>
+      <button data-act="stab-d:review" aria-current="${ui.shopTab==='review'}">口コミ（${rv.length}）</button>
+      <button data-act="stab-d:info" aria-current="${ui.shopTab==='info'}">お店の情報</button>
+    </div>
+    ${body}`;
+  const f = $('#rvform');
+  if (f) f.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = $('#rvtext').value.trim();
+    if (!ui.review.stars){ toast('星の数を選んでください'); return; }
+    if (!text && !ui.review.tags.length){ toast('コメントかタグを1つ以上入れてください'); return; }
+    (S.reviews[s.id] = S.reviews[s.id] || []).unshift({stars:ui.review.stars, tags:ui.review.tags.slice(), text, date:iso(TODAY), by:'あなた'});
+    ui.review = {stars:0, tags:[]}; save(); render(); toast('口コミを投稿しました');
+  });
+}
+function menuCard(mm){
+  const st = statusOf(mm), open = ui.open.has(mm.id);
+  const ccChips = mm.cc.length ? mm.cc.map(id => `<span class="chip ${S.profile.includes(id)?'cchit':''}">${esc(alName(id))}</span>`).join('') : '';
+  return `<li class="mcard ${S.profile.length?st.k:''}">
+    <div class="mtop"><span class="mname">${esc(mm.name)}</span><span class="price">${yen(mm.price)}</span></div>
+    <div>${statusPill(mm)}</div>
+    <div class="chips">${alChips(mm)}</div>
+    <button class="mmore" data-act="tm:${mm.id}" aria-expanded="${open}">原材料を見る${IC.chev}</button>
+    ${open ? `<div class="ing"><dl>
+      <div><dt>原材料</dt><dd>${esc(mm.ing)}</dd></div>
+      ${ccChips?`<div><dt>調理場で混ざる可能性があるもの</dt><dd class="chips">${ccChips}</dd></div>`:''}
+      ${mm.note?`<div><dt>お店からの補足</dt><dd>${esc(mm.note)}</dd></div>`:''}
+    </dl><div class="checked">最新確認日 ${md(mm.checked)}（${daysSince(mm.checked)<=0?'今日':daysSince(mm.checked)+'日前'}）・お店が登録</div></div>` : ''}
+  </li>`;
+}
+function renderFav(){
+  main.classList.remove('is-map');
+  const list = S.favs.map(shopById).filter(Boolean);
+  main.innerHTML = `<div class="pad"><h2 class="section-title">行きたいお店</h2>
+    ${list.length ? `<ul class="shoplist" style="padding:0">${list.map(shopRow).join('')}</ul>` : `<div class="empty">${IC.heart}<div>まだ保存したお店はありません。<br>お店のページの「行きたい」で保存できます。</div><button class="btn sm" data-act="tab:map">地図で探す</button></div>`}</div>`;
+}
+function renderQR(){
+  main.classList.remove('is-map');
+  main.innerHTML = `
+    <div class="scanner ${ui.scanning?'busy':''}" id="scanner"><div class="frame"></div><div class="line"></div>
+      ${ui.scanning ? `<div class="held">${qrSvg(qrText(ui.scanning.shop, ui.scanning.table))}</div>` : ''}
+      <div class="hint">${ui.scanning ? '読み取り中…' : 'テーブルのQRコードを枠に合わせてください'}</div></div>
+    <div class="pad" style="padding-top:0"><b>デモ：読み取るQRを選ぶ</b><div class="small muted">実際のアプリではカメラで読み取ります。ここでは各お店の卓上QRをタップすると読み取りを再現します。</div></div>
+    <div class="qrgrid">${S.shops.map((s,i) => `<button class="qrpick" data-act="scan:${s.id}:${(i%6)+1}">${qrSvg(qrText(s.id,(i%6)+1))}<span>${esc(s.name)}</span></button>`).join('')}</div>`;
+}
+function renderMe(){
+  main.classList.remove('is-map');
+  main.innerHTML = `<div class="pad" style="display:grid;gap:14px">
+    <div><h2 class="section-title" style="margin-bottom:2px">避けたい原材料</h2><div class="small muted">選んだ原材料を含むメニューは赤く表示され、地図の数字にも反映されます。最初は例として「卵」を選んでいます。</div></div>
+    <div class="card"><b class="small">特定原材料（表示義務8品目）</b>
+      <div class="algrid">${ALLERGENS.filter(a=>a.req).map(alBtn).join('')}</div>
+      <b class="small">その他（推奨表示の一部）</b>
+      <div class="algrid">${ALLERGENS.filter(a=>!a.req).map(alBtn).join('')}</div></div>
+    <div class="card"><button class="toggle" data-act="strict" aria-pressed="${S.strict}" style="font-size:13px;color:var(--ink);text-align:left"><span class="sw"></span>調理場で混ざる可能性があるメニューは「安心」に数えない</button>
+      <div class="small muted">同じ鍋や油を使うなど、お店が申告した注意点を厳しめに扱います。</div></div>
+    <div class="card"><b class="small">デモデータ</b><div class="small muted">登録したメニュー・口コミ・行きたいリストを最初の状態に戻します。</div>
+      ${ui.resetAsk ? `<div class="srow"><span class="grow small">本当に戻しますか？</span><button class="btn sm danger" data-act="reset-yes">戻す</button><button class="btn sm ghost" data-act="reset-no">やめる</button></div>` : `<button class="btn sm line" data-act="reset">最初の状態に戻す</button>`}</div>
+  </div>`;
+}
+const alBtn = a => `<button data-act="pf:${a.id}" aria-pressed="${S.profile.includes(a.id)}">${esc(a.label)}</button>`;
+
+/* ---------- views: store ---------- */
+function storeBar(){
+  return `<div class="storebar"><span class="muted">ログイン中（デモ）</span><select id="storeSel" aria-label="店舗を選ぶ">${S.shops.map(s => `<option value="${s.id}" ${s.id===S.storeId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`;
+}
+function bindStoreSel(){ const el = $('#storeSel'); if (el) el.addEventListener('change', e => { S.storeId = e.target.value; save(); render(); }); }
+function renderStoreHome(){
+  main.classList.remove('is-map');
+  const s = shopById(S.storeId), st = S.stats[s.id], lc = lastChecked(s), d = daysSince(lc);
+  const rvc = (S.reviews[s.id]||[]).length;
+  const interest = [['卵',41],['乳',33],['小麦',29],['えび',12],['そば',9],['落花生',7]];
+  const base = st.views;
+  const week = [0.11,0.13,0.12,0.15,0.17,0.2,0.12].map((f,i) => Math.round(base*f*(i===6?1.1:1)));
+  const wmax = Math.max(...week);
+  const dn = ['月','火','水','木','金','土','日'];
+  const shown = s.menus.map((mm,i) => [mm.name, Math.round(base*(0.55 - i*0.09))]).sort((a,b)=>b[1]-a[1]);
+  const smax = shown[0] ? shown[0][1] : 1;
+  main.innerHTML = `${storeBar()}
+    <div class="remind ${d>=7?'':'good'}">
+      <div class="h">${d>=7?IC.bell:IC.shield}${d>=7?`原材料の最終確認から${d}日たちました`:'原材料は最新の状態です'}</div>
+      <div class="small">${d>=7?'週に1回、メニューの原材料に変更がないか確認してください。変更がなければワンタップで確認済みにできます。':`最終確認 ${md(lc)}。次のリマインドは${md(dayOffset(7-d))}です。`}</div>
+      ${d>=7?`<div class="srow"><button class="btn sm" data-act="confirm-all">変更なし・すべて確認済みにする</button><button class="btn sm ghost" data-act="stab:menus">メニューを見直す</button></div>`:''}
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">お店ページの閲覧</div><div class="v">${st.views}<small>回</small></div><div class="delta">先週比 +18%</div></div>
+      <div class="tile"><div class="k">店頭QRの読み取り</div><div class="v">${st.qr}<small>回</small></div><div class="delta">先週比 +6%</div></div>
+      <div class="tile"><div class="k">行きたい登録</div><div class="v">${st.saved}<small>人</small></div></div>
+      <div class="tile"><div class="k">口コミ</div><div class="v">${rvc}<small>件</small></div></div>
+    </div>
+    <div class="panel"><h3>今週の閲覧数</h3><div class="cap">オレンジが今日。</div>
+      <div class="week">${week.map((v,i) => `<div><i style="height:${Math.max(6,v/wmax*70)}px" title="${v}回"></i><span>${dn[i]}</span></div>`).join('')}</div></div>
+    <div class="panel"><h3>閲覧した人が避けている原材料</h3><div class="cap">お店ページを見た利用者のうち、その原材料を避けたい設定にしている人の割合（デモ値）</div>
+      <div class="bars">${interest.map(([k,v]) => `<div class="bar"><span>${k}</span><span class="tr"><span class="fl" style="display:block;width:${v/50*100}%"></span></span><span class="n">${v}%</span></div>`).join('')}</div></div>
+    <div class="panel" style="margin-bottom:20px"><h3>よく見られたメニュー</h3><div class="cap">原材料の詳細が開かれた回数（デモ値）</div>
+      <div class="bars">${shown.map(([k,v]) => `<div class="bar" style="grid-template-columns:110px 1fr 36px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</span><span class="tr"><span class="fl" style="display:block;width:${Math.max(4,v/smax*100)}%;background:var(--pin)"></span></span><span class="n">${Math.max(v,3)}</span></div>`).join('')}</div></div>`;
+  bindStoreSel();
+}
+function renderStoreMenus(){
+  main.classList.remove('is-map');
+  const s = shopById(S.storeId);
+  main.innerHTML = `${storeBar()}
+    <div class="pad" style="padding-bottom:0;display:flex;align-items:center;gap:8px"><h2 class="section-title grow" style="margin:0;flex:1">メニューと原材料</h2><button class="btn sm" data-act="new-menu">${IC.plus}追加</button></div>
+    <ul class="smenus">${s.menus.map(mm => {
+      const d = daysSince(mm.checked);
+      return `<li><div class="srow"><b class="grow">${esc(mm.name)}</b><span class="price">${yen(mm.price)}</span></div>
+        <div class="chips">${mm.al.map(id => `<span class="chip">${esc(alName(id))}</span>`).join('') || '<span class="chip">アレルゲンなし</span>'}${mm.cc.length?`<span class="chip cchit">混入注意 ${mm.cc.length}</span>`:''}</div>
+        <div class="srow"><span class="grow small ${d>=7?'':'muted'}" style="${d>=7?'color:var(--cc);font-weight:700':''}">最新確認 ${md(mm.checked)}（${d<=0?'今日':d+'日前'}）</span>
+          ${d>0?`<button class="btn sm ghost" data-act="confirm:${mm.id}">${IC.check}変更なし</button>`:''}
+          <button class="btn sm line" data-act="edit:${mm.id}">編集</button></div></li>`;
+    }).join('')}</ul>`;
+  bindStoreSel();
+}
+function renderStoreQR(){
+  main.classList.remove('is-map');
+  const s = shopById(S.storeId);
+  const t = ui.qrTable || 1;
+  main.innerHTML = `${storeBar()}
+    <div class="pop">
+      <div class="small" style="font-weight:700;color:var(--sage)">原材料・アレルゲンはこちら</div>
+      <h3>${esc(s.name)}</h3>
+      <div class="qrbox">${qrSvg(qrText(s.id,t))}</div>
+      <div class="small muted">スマホのカメラで読み取ると、メニューごとの原材料が見られます。<br>声をかけなくても確認できます。</div>
+      <div style="font-family:var(--f-display);font-weight:900;color:var(--pin)">ふらっとごはん</div>
+    </div>
+    <div class="pad" style="padding-top:0;display:grid;gap:8px">
+      <label class="f">テーブル番号<select id="qrTable">${[1,2,3,4,5,6].map(n => `<option ${n===t?'selected':''}>${n}</option>`).join('')}</select></label>
+      <div class="small muted">卓上POPのイメージです。印刷してテーブルに置く想定です。QRの中身：<br><code style="font-size:11px;word-break:break-all">${esc(qrText(s.id,t))}</code></div>
+      <button class="btn ghost" data-act="try-qr">利用者側で読み取りを試す</button>
+    </div>`;
+  bindStoreSel();
+  $('#qrTable').addEventListener('change', e => { ui.qrTable = +e.target.value; renderStoreQR(); });
+}
+
+/* ---------- editor ---------- */
+const SAMPLE_OCR = '米、鶏もも肉、玉ねぎ、卵、トマトケチャップ（トマト、砂糖、醸造酢、食塩）、バター、食塩、こしょう';
+function openEditor(menuId){
+  const s = shopById(S.storeId);
+  const mm = menuId ? s.menus.find(x => x.id === menuId) : null;
+  ui.ed = {id: mm ? mm.id : null, al:new Set(mm ? mm.al : []), cc:new Set(mm ? mm.cc : []), auto:new Set(), off:new Set(), photo:null, ocr:false, del:false};
+  const el = document.createElement('div'); el.className = 'editor';
+  el.innerHTML = `
+    <div class="ehead"><button class="icon-btn" data-act="close-ed" aria-label="閉じる">${IC.x}</button><h2>${mm?'メニューを編集':'メニューを登録'}</h2></div>
+    <div class="ebody">
+      <div class="photo" id="photoArea"></div>
+      <label class="f">メニュー名<input type="text" id="ed-name" value="${mm?esc(mm.name):''}" placeholder="例：オムライス"></label>
+      <label class="f">価格（円）<input type="number" id="ed-price" inputmode="numeric" value="${mm?mm.price:''}" placeholder="980"></label>
+      <label class="f">原材料<span class="fieldnote">読点「、」で区切って入力。入力に合わせてアレルゲンを自動でチェックします。</span><textarea id="ed-ing" placeholder="例：米、鶏もも肉、玉ねぎ、卵">${mm?esc(mm.ing):''}</textarea></label>
+      <div class="f">含まれるアレルゲン<span class="fieldnote">「自動」は原材料から見つけたもの。最終確認はお店で行ってください。</span><div class="altoggle" id="ed-al"></div></div>
+      <details class="more" ${mm && mm.cc.length?'open':''}><summary>調理場で混ざる可能性（同じ鍋・油・器具など）</summary><div class="altoggle cc" id="ed-cc"></div></details>
+      <label class="f">お店からの補足（任意）<textarea id="ed-note" placeholder="例：えびフライと同じ揚げ油を使っています">${mm?esc(mm.note):''}</textarea></label>
+      <div id="ed-del"></div>
+    </div>
+    <div class="efoot"><button class="btn ghost" data-act="close-ed">やめる</button><button class="btn" data-act="save-ed">${IC.check}保存して公開</button></div>`;
+  $('#editorSlot').innerHTML = ''; $('#editorSlot').appendChild(el);
+  renderPhoto(); renderEdChips(); renderEdDel();
+  $('#ed-ing').addEventListener('input', autoDetect);
+}
+function renderPhoto(){
+  const a = $('#photoArea'); if (!a) return; const e = ui.ed;
+  a.innerHTML = `<b class="small" style="display:flex;align-items:center;gap:6px">${IC.camera.replace('<svg','<svg width="18" height="18"')}原材料表示を写真から入力</b>
+    ${e.photo ? (e.photo === 'sample' ? `<div class="label-mock"><b>名称　オムライスソース・具材</b>原材料名：${SAMPLE_OCR}</div>` : `<img src="${e.photo}" alt="アップロードした原材料表示の写真">`) : '<div class="small muted">仕入れ品の原材料ラベルを撮影すると、文字を読み取って入力欄に入れます。</div>'}
+    ${e.ocr ? '<div class="ocr"><span class="spinner"></span>原材料を読み取り中…</div>' : ''}
+    <div class="row"><label class="btn sm ghost" style="cursor:pointer">${IC.camera}写真を選ぶ<input type="file" id="ed-photo" accept="image/*" hidden></label><button class="btn sm ghost" data-act="sample-photo">サンプルで試す</button></div>
+    <div class="fieldnote">デモでは文字認識は行わず、サンプルの読み取り結果を入れます。</div>`;
+  $('#ed-photo').addEventListener('change', ev => {
+    const f = ev.target.files && ev.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => { ui.ed.photo = r.result; runOCR(); }; r.readAsDataURL(f);
+  });
+}
+function runOCR(){
+  ui.ed.ocr = true; renderPhoto();
+  setTimeout(() => {
+    if (!ui.ed) return;
+    ui.ed.ocr = false; $('#ed-ing').value = SAMPLE_OCR;
+    if (!$('#ed-name').value) $('#ed-name').value = 'オムライス（写真から登録）';
+    autoDetect(); renderPhoto(); toast('原材料を読み取りました。内容を確認してください');
+  }, 1300);
+}
+function autoDetect(){
+  const e = ui.ed; const found = detect($('#ed-ing').value);
+  e.auto = new Set(found);
+  found.forEach(id => { if (!e.off.has(id)) e.al.add(id); });
+  renderEdChips();
+}
+function renderEdChips(){
+  const e = ui.ed;
+  $('#ed-al').innerHTML = ALLERGENS.map(a => `<button type="button" data-act="eda:${a.id}" aria-pressed="${e.al.has(a.id)}" class="${e.auto.has(a.id)&&e.al.has(a.id)?'auto':''}">${esc(a.label)}</button>`).join('');
+  $('#ed-cc').innerHTML = ALLERGENS.map(a => `<button type="button" data-act="edc:${a.id}" aria-pressed="${e.cc.has(a.id)}">${esc(a.label)}</button>`).join('');
+}
+function renderEdDel(){
+  const el = $('#ed-del'); if (!el || !ui.ed.id) return;
+  el.innerHTML = ui.ed.del ? `<div class="srow"><span class="grow small">このメニューを削除しますか？</span><button class="btn sm danger" data-act="del-yes">削除する</button><button class="btn sm ghost" data-act="del-no">やめる</button></div>` : `<button class="btn sm danger" data-act="del-ask">このメニューを削除</button>`;
+}
+function saveEditor(){
+  const e = ui.ed, s = shopById(S.storeId);
+  const name = $('#ed-name').value.trim(), price = parseInt($('#ed-price').value,10), ing = $('#ed-ing').value.trim(), note = $('#ed-note').value.trim();
+  if (!name){ toast('メニュー名を入力してください'); $('#ed-name').focus(); return; }
+  if (!ing){ toast('原材料を入力してください'); $('#ed-ing').focus(); return; }
+  const order = id => ALLERGENS.findIndex(a => a.id === id);
+  const data = {name, price: isNaN(price)?0:price, ing, note, al:[...e.al].sort((a,b)=>order(a)-order(b)), cc:[...e.cc].filter(id=>!e.al.has(id)).sort((a,b)=>order(a)-order(b)), checked:iso(TODAY)};
+  if (e.id){ Object.assign(s.menus.find(x => x.id === e.id), data); }
+  else s.menus.push(Object.assign({id:uid()}, data));
+  save(); closeEditor(); render(); toast(`「${name}」を公開しました`);
+}
+function closeEditor(){ ui.ed = null; $('#editorSlot').innerHTML = ''; }
+
+/* ---------- tabbar & render ---------- */
+function renderTabbar(){
+  const tabs = ui.mode === 'user'
+    ? [['map','地図',IC.map],['fav','行きたい',IC.heart],['qr','QR読み取り',IC.qr],['me','マイ設定',IC.user]]
+    : [['home','ホーム',IC.home],['menus','メニュー',IC.list],['qr','店頭QR',IC.qr]];
+  const cur = ui.mode === 'user' ? (ui.shop ? 'map' : ui.tab) : ui.stab;
+  $('#tabbar').innerHTML = tabs.map(([id,l,ic]) => `<button data-act="${ui.mode==='user'?'tab':'stab'}:${id}" aria-current="${cur===id}">${ic}<span>${l}</span></button>`).join('');
+  $('#seg-user').setAttribute('aria-pressed', ui.mode === 'user');
+  $('#seg-store').setAttribute('aria-pressed', ui.mode === 'store');
+}
+let lastView = '';
+function render(){
+  renderTabbar();
+  const view = ui.mode + ':' + (ui.mode==='user' ? (ui.shop ? 'shop-'+ui.shop+'-'+ui.shopTab : ui.tab) : ui.stab);
+  const keepScroll = view === lastView ? main.scrollTop : 0;
+  if (ui.mode === 'user'){
+    if (ui.shop) renderDetail();
+    else ({map:renderMap, fav:renderFav, qr:renderQR, me:renderMe})[ui.tab]();
+  } else ({home:renderStoreHome, menus:renderStoreMenus, qr:renderStoreQR})[ui.stab]();
+  main.scrollTop = keepScroll; lastView = view;
+}
+
+function openShop(id, opts){
+  ui.shop = id; ui.shopTab = (opts && opts.tab) || 'menu'; ui.open = new Set(); ui.menuOnlyOk = false; ui.review = {stars:0,tags:[]};
+  ui.fromQR = (opts && opts.qr) || null; ui.sel = id;
+  if (S.stats[id]) { S.stats[id].views++; save(); }
+  render();
+}
+
+/* ---------- actions ---------- */
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-act]'); if (!t) return;
+  const [act, a1, a2] = t.dataset.act.split(':');
+  switch (act){
+    case 'mode': ui.mode = a1; ui.shop = null; ui.fromQR = null; closeEditor(); render(); break;
+    case 'tab': ui.mode = 'user'; ui.tab = a1; ui.shop = null; if (a1 !== 'qr') ui.fromQR = null; ui.resetAsk = false; render(); break;
+    case 'stab': ui.mode = 'store'; ui.stab = a1; render(); break;
+    case 'open': openShop(a1); break;
+    case 'back': { const q = ui.fromQR; ui.shop = null; ui.fromQR = null; ui.tab = q ? 'qr' : 'map'; render(); break; }
+    case 'fav': { const i = S.favs.indexOf(a1); if (i >= 0){ S.favs.splice(i,1); S.stats[a1].saved--; toast('行きたいリストから外しました'); } else { S.favs.push(a1); S.stats[a1].saved++; toast('行きたいリストに保存しました'); } save(); render(); break; }
+    case 'stab-d': ui.shopTab = a1; render(); break;
+    case 'tm': ui.open.has(a1) ? ui.open.delete(a1) : ui.open.add(a1); render(); break;
+    case 'menuonly': ui.menuOnlyOk = !ui.menuOnlyOk; render(); break;
+    case 'onlyok': ui.onlyOk = !ui.onlyOk; renderList(); renderPins(); break;
+    case 'pf': { const i = S.profile.indexOf(a1); i >= 0 ? S.profile.splice(i,1) : S.profile.push(a1); save(); render(); break; }
+    case 'strict': S.strict = !S.strict; save(); render(); break;
+    case 'reset': ui.resetAsk = true; render(); break;
+    case 'reset-no': ui.resetAsk = false; render(); break;
+    case 'reset-yes': S = seed(); save(); ui.resetAsk = false; ui.sel = null; render(); toast('最初の状態に戻しました'); break;
+    case 'star': ui.review.stars = +a1; document.querySelectorAll('.starpick button').forEach((b,i) => b.classList.toggle('on', i < ui.review.stars)); break;
+    case 'rtag': { const n = +a1, i = ui.review.tags.indexOf(n); i >= 0 ? ui.review.tags.splice(i,1) : ui.review.tags.push(n); t.setAttribute('aria-pressed', i < 0); break; }
+    case 'scan': {
+      if (ui.scanning) break;
+      ui.scanning = {shop:a1, table:+a2}; renderQR();
+      setTimeout(() => { const sc = ui.scanning; ui.scanning = null; if (S.stats[sc.shop]) S.stats[sc.shop].qr++; save(); if (ui.mode==='user' && ui.tab==='qr' && !ui.shop) openShop(sc.shop, {qr:sc}); }, 1100);
+      break;
+    }
+    case 'try-qr': { const sid = S.storeId; ui.mode = 'user'; ui.tab = 'qr'; ui.shop = null; render(); setTimeout(() => { const b = document.querySelector(`[data-act^="scan:${sid}:"]`); if (b) b.click(); }, 300); break; }
+    case 'zoom': { zoomAt(a1 === 'in' ? 0.75 : 1.33, vb.x + vb.w/2, vb.y + vb.h/2); break; }
+    case 'locate': centerOn(USER_LOC.x, USER_LOC.y - 20, 520); break;
+    case 'new-menu': openEditor(null); break;
+    case 'edit': openEditor(a1); break;
+    case 'close-ed': closeEditor(); break;
+    case 'save-ed': saveEditor(); break;
+    case 'sample-photo': ui.ed.photo = 'sample'; runOCR(); break;
+    case 'eda': { const e = ui.ed; if (e.al.has(a1)){ e.al.delete(a1); e.off.add(a1); } else { e.al.add(a1); e.off.delete(a1); } renderEdChips(); break; }
+    case 'edc': { const e = ui.ed; e.cc.has(a1) ? e.cc.delete(a1) : e.cc.add(a1); renderEdChips(); break; }
+    case 'del-ask': ui.ed.del = true; renderEdDel(); break;
+    case 'del-no': ui.ed.del = false; renderEdDel(); break;
+    case 'del-yes': { const s = shopById(S.storeId); s.menus = s.menus.filter(x => x.id !== ui.ed.id); save(); closeEditor(); render(); toast('メニューを削除しました'); break; }
+    case 'confirm': { const s = shopById(S.storeId); const mm = s.menus.find(x => x.id === a1); mm.checked = iso(TODAY); save(); render(); toast(`「${mm.name}」を確認済みにしました`); break; }
+    case 'confirm-all': { shopById(S.storeId).menus.forEach(mm => mm.checked = iso(TODAY)); save(); render(); toast('すべてのメニューを今日の日付で確認済みにしました'); break; }
+    case 'toggle-guide': $('#guide').classList.toggle('open'); break;
+    case 'guide': runGuide(a1); break;
+  }
+});
+
+function runGuide(step){
+  $('#guide').classList.remove('open');
+  closeEditor();
+  switch (step){
+    case 'u1': ui.mode='user'; ui.tab='map'; ui.shop=null; ui.fromQR=null; ui.sel='s1'; render(); setTimeout(() => centerOn(480, 560, 560), 60); break;
+    case 'u2': ui.mode='user'; openShop('s1'); { const s = shopById('s1'); if (s.menus[0]) { ui.open.add(s.menus[0].id); render(); } } break;
+    case 'u3': ui.mode='user'; openShop('s3'); toast('「行きたい」で保存できます'); break;
+    case 'u4': ui.mode='user'; ui.tab='qr'; ui.shop=null; ui.fromQR=null; render(); break;
+    case 'u5': ui.mode='user'; openShop('s1', {tab:'review'}); break;
+    case 's1': ui.mode='store'; ui.stab='menus'; render(); openEditor(null); break;
+    case 's2': ui.mode='store'; ui.stab='menus'; render(); break;
+    case 's3': ui.mode='store'; ui.stab='home'; render(); break;
+  }
+}
+
+render();
+})();
+</script>
+</body>
+</html>
